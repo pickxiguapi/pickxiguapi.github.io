@@ -1,0 +1,211 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多智能体强化学习环境图建模思考 | Xiguapi's Page</title><meta name="keywords" content="图网络,对手建模,Opponent Modeling"><meta name="author" content="Xiguapi"><meta name="copyright" content="Xiguapi"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="在多智能体环境中，如何将agent建模为图？如何定义节点和边？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多智能体强化学习环境图建模思考">
+<meta property="og:url" content="http://yuanyf.ml/2021/03/31/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%BB%BA%E6%A8%A1%E6%80%9D%E8%80%83/index.html">
+<meta property="og:site_name" content="Xiguapi&#39;s Page">
+<meta property="og:description" content="在多智能体环境中，如何将agent建模为图？如何定义节点和边？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/03/28/ZjWnxVMeNHL9ik7.png">
+<meta property="article:published_time" content="2021-03-31T07:00:20.000Z">
+<meta property="article:modified_time" content="2021-03-31T07:00:23.000Z">
+<meta property="article:author" content="Xiguapi">
+<meta property="article:tag" content="图网络">
+<meta property="article:tag" content="对手建模">
+<meta property="article:tag" content="Opponent Modeling">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/03/28/ZjWnxVMeNHL9ik7.png"><link rel="shortcut icon" href="/img/icoon.jpg"><link rel="canonical" href="http://yuanyf.ml/2021/03/31/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%BB%BA%E6%A8%A1%E6%80%9D%E8%80%83/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-03-31 15:00:23'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/a1.gif" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">23</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/algorithm/"><i class="fa-fw fas fa-robot"></i><span> 算法复现</span></a></div><div class="menus_item"><a class="site-page" href="/datashare/"><i class="fa-fw fas fa-table"></i><span> 资料分享</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://i.loli.net/2021/03/28/anyAMcDf6xsIOZk.png)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Xiguapi's Page</a></span><span id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/algorithm/"><i class="fa-fw fas fa-robot"></i><span> 算法复现</span></a></div><div class="menus_item"><a class="site-page" href="/datashare/"><i class="fa-fw fas fa-table"></i><span> 资料分享</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><h1 class="post-title">多智能体强化学习环境图建模思考</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-03-31T07:00:20.000Z" title="发表于 2021-03-31 15:00:20">2021-03-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-03-31T07:00:23.000Z" title="更新于 2021-03-31 15:00:23">2021-03-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Opponent-Modeling/">Opponent Modeling</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="从dgn开始"><a class="markdownIt-Anchor" href="#从dgn开始"></a> 从DGN开始</h2>
+<p>DGN：GRAPH CONVOLUTIONAL REINFORCEMENT LEARNING（ICLR2020）</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/PKU-AI-Edge/DGN">论文源代码</a><br />
+<a target="_blank" rel="noopener" href="https://github.com/jiechuanjiang/pytorch_DGN">Surviving</a></p>
+<p><strong>Surviving环境</strong></p>
+<p>在surviving环境中有100个agent。agent可以以自己为中心局部观测3 x 3区域，可以与7 x 7区域通信。每个agent有10条命，每一步降低一条命，吃到food可以增加两条命。如果智能体0命的时候，得到reward -2，否则得到reward 0.4.</p>
+<p><img src="https://i.loli.net/2021/03/31/38UCV2wTFJYXDN7.png" alt="image.png" /></p>
+<p><em>在该环境中如何建模？</em></p>
+<p>首先GCN的输入分为两部分：节点特征和整个图</p>
+<p>1、整个图 用邻接矩阵表示<br />
+100个agent则初始化一个100 x 100的numpy.zeros矩阵<br />
+建立边的逻辑为如果7 x 7通讯区域内有agent则建立边</p>
+<p>2、自身状态 obs_space = 27<br />
+自身坐标：（x, y） 转换为二进制 10维<br />
+3x3观测范围内有无其他agent: 8维<br />
+3x3观测范围内有无食物：8维<br />
+自身还剩多少命：1维 （最开始是10）</p>
+<p>3、动作为1维，有5种情况：<br />
+0：左<br />
+1：右<br />
+2：上<br />
+3：下<br />
+4：吃</p>
+<p><strong>Cooperative predator-prey环境</strong></p>
+<p>设置观测范围，如果在观测范围内就建立边</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Xiguapi</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://yuanyf.ml/2021/03/31/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%BB%BA%E6%A8%A1%E6%80%9D%E8%80%83/">http://yuanyf.ml/2021/03/31/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%BB%BA%E6%A8%A1%E6%80%9D%E8%80%83/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://yuanyf.ml" target="_blank">Xiguapi's Page</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%9B%BE%E7%BD%91%E7%BB%9C/">图网络</a><a class="post-meta__tags" href="/tags/%E5%AF%B9%E6%89%8B%E5%BB%BA%E6%A8%A1/">对手建模</a><a class="post-meta__tags" href="/tags/Opponent-Modeling/">Opponent Modeling</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/03/28/ZjWnxVMeNHL9ik7.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/04/01/(G2ANet)Multi-Agent%20Game%20Abstraction%20via%20Graph%20Attention%20Neural%20Network/"><img class="prev-cover" src="https://i.loli.net/2021/04/01/JZ9eybCUr7VxX4L.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">GNN 5: (G2ANet)Multi-Agent Game Abstraction via Graph Attention Neural Network</div></div></a></div><div class="next-post pull-right"><a href="/2021/03/28/(SOM)Self%20Other%20Modeling/"><img class="next-cover" src="https://i.loli.net/2021/03/28/ZjWnxVMeNHL9ik7.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Opponent Modeling 4： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/03/07/(DPIQN)A Deep Policy Inference Q-Network for Multi-Agent Systems/" title="Opponent Modeling 3： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）"><img class="cover" src="https://i.loli.net/2021/03/10/doKT2WQphrujS5v.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-07</div><div class="title">Opponent Modeling 3： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）</div></div></a></div><div><a href="/2020/12/10/(DRON)Opponent Modeling in Deep Reinforcement Learning/" title="Opponent Modeling 1： Opponent Modeling in Deep Reinforcement Learning（论文阅读笔记）"><img class="cover" src="https://i.loli.net/2020/12/14/VhBtEAF8lOUoJwx.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-10</div><div class="title">Opponent Modeling 1： Opponent Modeling in Deep Reinforcement Learning（论文阅读笔记）</div></div></a></div><div><a href="/2021/02/08/(DeepBPR+)A Deep Bayesian Policy Reuse Approach Against Non-Stationary Agent/" title="Opponent Modeling 2： A Deep Bayesian Policy Reuse Approach Against Non-Stationary Agents（Deep BPR+论文阅读笔记）"><img class="cover" src="https://i.loli.net/2021/02/27/PNrS8emZquV2sAJ.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-02-08</div><div class="title">Opponent Modeling 2： A Deep Bayesian Policy Reuse Approach Against Non-Stationary Agents（Deep BPR+论文阅读笔记）</div></div></a></div><div><a href="/2021/03/12/(GASIL)predator-prey改进版实验环境/" title="GASIL cooperative predator-prey实验环境分析"><img class="cover" src="https://raw.githubusercontent.com/tjuHaoXiaotian/GASIL/master/files/img/predator-prey.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-12</div><div class="title">GASIL cooperative predator-prey实验环境分析</div></div></a></div><div><a href="/2021/03/28/(SOM)Self Other Modeling/" title="Opponent Modeling 4： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）"><img class="cover" src="https://i.loli.net/2021/03/28/ZjWnxVMeNHL9ik7.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-28</div><div class="title">Opponent Modeling 4： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）</div></div></a></div><div><a href="/2021/01/29/(DGN)GRAPH CONVOLUTIONAL REINFORCEMENT LEARNING/" title="GNN 2: GRAPH CONVOLUTIONAL REINFORCEMENT LEARNING（论文阅读笔记）"><img class="cover" src="https://i.loli.net/2021/02/04/gHlpVbZ5n3AWeyQ.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-01-29</div><div class="title">GNN 2: GRAPH CONVOLUTIONAL REINFORCEMENT LEARNING（论文阅读笔记）</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81MjMwOS8yODc4Nw"></div></div></div></div></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/a1.gif" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Xiguapi</div><div class="author-info__description">no fear of words, no fear of years.</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">23</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/pickxiguapi"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/pickxiguapi" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:yuanyf1999@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://qm.qq.com/cgi-bin/qm/qr?k=ioUJlpU-XAiqna8X8yWUgTxMVxykkhZ8&amp;noverify=0" target="_blank" title="QQ"><i class="fab fa-qq"></i></a></div></div></div><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">Be positive, be patient.</div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8Edgn%E5%BC%80%E5%A7%8B"><span class="toc-number">1.</span> <span class="toc-text"> 从DGN开始</span></a></li></ol></div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/04/01/(G2ANet)Multi-Agent%20Game%20Abstraction%20via%20Graph%20Attention%20Neural%20Network/" title="GNN 5: (G2ANet)Multi-Agent Game Abstraction via Graph Attention Neural Network"><img src="https://i.loli.net/2021/04/01/JZ9eybCUr7VxX4L.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GNN 5: (G2ANet)Multi-Agent Game Abstraction via Graph Attention Neural Network"/></a><div class="content"><a class="title" href="/2021/04/01/(G2ANet)Multi-Agent%20Game%20Abstraction%20via%20Graph%20Attention%20Neural%20Network/" title="GNN 5: (G2ANet)Multi-Agent Game Abstraction via Graph Attention Neural Network">GNN 5: (G2ANet)Multi-Agent Game Abstraction via Graph Attention Neural Network</a><time datetime="2021-04-01T08:32:33.000Z" title="发表于 2021-04-01 16:32:33">2021-04-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/31/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%BB%BA%E6%A8%A1%E6%80%9D%E8%80%83/" title="多智能体强化学习环境图建模思考"><img src="https://i.loli.net/2021/03/28/ZjWnxVMeNHL9ik7.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="多智能体强化学习环境图建模思考"/></a><div class="content"><a class="title" href="/2021/03/31/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E5%9B%BE%E5%BB%BA%E6%A8%A1%E6%80%9D%E8%80%83/" title="多智能体强化学习环境图建模思考">多智能体强化学习环境图建模思考</a><time datetime="2021-03-31T07:00:20.000Z" title="发表于 2021-03-31 15:00:20">2021-03-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/28/(SOM)Self%20Other%20Modeling/" title="Opponent Modeling 4： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）"><img src="https://i.loli.net/2021/03/28/ZjWnxVMeNHL9ik7.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Opponent Modeling 4： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）"/></a><div class="content"><a class="title" href="/2021/03/28/(SOM)Self%20Other%20Modeling/" title="Opponent Modeling 4： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）">Opponent Modeling 4： A Deep Policy Inference Q-Network for Multi-Agent Systems（论文阅读笔记）</a><time datetime="2021-03-28T13:57:14.000Z" title="发表于 2021-03-28 21:57:14">2021-03-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/21/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%801%20%E6%9E%9A%E4%B8%BE/" title="算法基础 1： 枚举"><img src="https://i.loli.net/2021/03/21/Y5CBfh3vGegzuOy.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="算法基础 1： 枚举"/></a><div class="content"><a class="title" href="/2021/03/21/%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%801%20%E6%9E%9A%E4%B8%BE/" title="算法基础 1： 枚举">算法基础 1： 枚举</a><time datetime="2021-03-21T01:20:45.000Z" title="发表于 2021-03-21 09:20:45">2021-03-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/18/(GAT)GRAPH%20ATTENTION%20NETWORKS/" title="GNN 4: GRAPH ATTENTION NETWORKS（GAT论文阅读笔记及相关理解）"><img src="https://i.loli.net/2021/03/19/2BlMqDRP98wdigk.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GNN 4: GRAPH ATTENTION NETWORKS（GAT论文阅读笔记及相关理解）"/></a><div class="content"><a class="title" href="/2021/03/18/(GAT)GRAPH%20ATTENTION%20NETWORKS/" title="GNN 4: GRAPH ATTENTION NETWORKS（GAT论文阅读笔记及相关理解）">GNN 4: GRAPH ATTENTION NETWORKS（GAT论文阅读笔记及相关理解）</a><time datetime="2021-03-18T09:20:17.000Z" title="发表于 2021-03-18 17:20:17">2021-03-18</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Xiguapi</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> {preloader.endLoading()})</script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css"><script>$(function () {
+  $('span.katex-display').wrap('<div class="katex-wrap"></div>')
+})</script><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script></div></body></html>
